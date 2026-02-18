@@ -1,0 +1,8 @@
+requests
+pdfplumber
+pytesseract
+Pillow
+transformers
+torch
+huggingface-hub
+fasttext
