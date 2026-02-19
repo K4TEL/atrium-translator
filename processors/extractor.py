@@ -133,6 +133,56 @@ class LayoutExtractor:
             print(f"Error processing HTML: {e}")
             return ""
 
+    def process_csv(self, csv_path):
+        """Extracts text from CSV files by concatenating all cells."""
+        try:
+            import pandas as pd
+            df = pd.read_csv(csv_path)
+            # detect text containing column "text"
+            text_col = None
+            for col in df.columns:
+                if 'text' in col.lower():
+                    text_col = col
+                    break
+            if text_col:
+                return "\n".join(df[text_col].dropna().astype(str).tolist())
+        except Exception as e:
+            print(f"Error processing CSV: {e}")
+            return ""
+
+    def process_json(self, json_path):
+        """Extracts text from JSON files by concatenating all string values."""
+        try:
+            import json
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            # from "text" fields extract all string values
+            def extract_text(obj):
+                # check for specifically "text" keys in objects recursively and extract values of these fields only
+                if isinstance(obj, dict):
+                    text_values = []
+                    for k, v in obj.items():
+                        if 'text' in k.lower() and isinstance(v, str):
+                            text_values.append(v)
+                        else:
+                            text_values.extend(extract_text(v))
+                    return text_values
+                elif isinstance(obj, list):
+                    text_values = []
+                    for item in obj:
+                        text_values.extend(extract_text(item))
+                    return text_values
+                else:
+                    return []
+
+            all_texts = extract_text(data)
+            return "\n".join(all_texts)
+
+        except Exception as e:
+            print(f"Error processing JSON: {e}")
+            return ""
+
     def extract(self, file_path):
         ext = file_path.lower().split('.')[-1]
 
@@ -144,6 +194,10 @@ class LayoutExtractor:
             return self.process_docx(file_path)
         elif ext in ['html', 'htm']:
             return self.process_html(file_path)
+        elif ext == 'csv':
+            return self.process_csv(file_path)
+        elif ext == 'json':
+            return self.process_json(file_path)
         elif ext == 'txt':
             with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
