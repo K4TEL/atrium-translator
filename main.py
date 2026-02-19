@@ -1,23 +1,43 @@
 import argparse
-import os
+from pathlib import Path
 
-from processors.extractor import *
-from processors.translator import *
-from processors.identifier import *
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="ATRIUM - Lindat Translation Wrapper")
+
+    # Source file
+    parser.add_argument("input_file", type=Path, help="Path to the source file (.pdf, .xml, .txt)")
+
+    # Optional Output and Target Language
+    parser.add_argument("--output", type=Path, default=None,
+                        help="Path to save the translated text. Defaults to '<input_name>_<target_lang>.txt'")
+    parser.add_argument("--target_lang", type=str, default="en",
+                        help="Target language code (e.g., 'en', 'cs', 'fr'). Default: 'en'")
+
+    args = parser.parse_args()
+
+    # ---------------------------------------------------------
+    # AUTOMATIC OUTPUT NAMING LOGIC
+    # ---------------------------------------------------------
+    if args.output is None:
+        # Extract the base name without extension (e.g., 'document' from 'document.pdf')
+        base_name = args.input_file.stem
+
+        # Create the new filename with the target language suffix
+        new_filename = f"{base_name}_{args.target_lang}.txt"
+
+        # Save it in the same directory as the input file
+        args.output = args.input_file.with_name(new_filename)
+
+    return args
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Lindat Translation Wrapper (PDF/XML/TXT)")
-    parser.add_argument("input_file", help="Path to input file (.pdf, .xml (ALTO), .txt)")
-    parser.add_argument("--output", help="Path to save translated text", default="output.txt")
-    parser.add_argument("--target_lang", help="Target language code (default: en)", default="en")
-    args = parser.parse_args()
+    args = parse_arguments()
 
-    if not os.path.exists(args.input_file):
-        print(f"Error: File '{args.input_file}' not found.")
-        return
-
-    print(f"--- Processing {args.input_file} ---")
+    print(f"Translating: {args.input_file}")
+    print(f"Target Language: {args.target_lang}")
+    print(f"Output will be saved to: {args.output}")
 
     # 1. Extract Text (Layout Analysis)
     print("Initializing LayoutReader and extracting text...")
