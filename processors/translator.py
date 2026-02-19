@@ -58,9 +58,12 @@ class LindatTranslator:
             # formData parameters: input_text, src, tgt (optional if model in URL)
             data = {"input_text": chunk}
 
+            # print(f"Requesting translation for chunk (length {len(chunk)} chars) using model {model_name}...")
+            # print(f"DEBUG: Request data: {data}")  # Debugging line to check request payload
+            # print(f"DEBUG: Request URL: {self.BASE_URL}/models/{model_name}?src={src_lang}&tgt={tgt_lang}")  # Debugging line to check URL
             # The URL pattern is /models/{model_name}/translate
             response = requests.post(
-                f"{self.BASE_URL}/models/{model_name}/translate",
+                f"{self.BASE_URL}/models/{model_name}?src={src_lang}&tgt={tgt_lang}",
                 data=data
             )
 
