@@ -2,9 +2,9 @@ import argparse
 from pathlib import Path
 
 # Assuming these are available in your project directory
-from extractor import LayoutExtractor
-from identifier import LanguageIdentifier
-from translator import LindatTranslator
+from processors.extractor import LayoutExtractor
+from processors.identifier import LanguageIdentifier
+from processors.translator import LindatTranslator
 from utils import get_xml_elements_and_texts
 
 
