@@ -12,7 +12,7 @@ A modular Python wrapper for the **Lindat Translation API** [^1]. This tool proc
   - [Python Dependencies](#2--python-dependencies)
 - [Project Structure](#-project-structure)
 - [Usage](#-usage)
-  - [Basic Usage](#-basic-usage-flat-text-extraction)
+  - [Basic Usage](#-batch-processing)
   - [Specifying Output and Target Language](#-targeted-xml-translation-in-place)
   - [Supported Arguments](#-supported-arguments)
 - [Logic Overview](#-logic-overview)
@@ -28,6 +28,8 @@ A modular Python wrapper for the **Lindat Translation API** [^1]. This tool proc
 * 🕵️ **Language Detection with Intelligent Fallback**: Automatically identifies the source language using **FastText** (Facebook) [^6]. If the detection confidence is low (< 0.4), it automatically defaults to Czech (`cs`) to ensure the pipeline continues.
 * 🔗 **Lindat API Integration**: Seamlessly connects to the Lindat Translation API (v2) for high-quality translation, including automatic cache handling to minimize redundant requests for identical XML strings [^1]).
 * 📐 **ALTO XML Parsing**: Native support for ALTO standards, including coordinate normalization and hyphenation handling.
+
+---
 
 ## 🛠️ Prerequisites
 
@@ -60,12 +62,15 @@ Install the required Python packages:
 pip install -r requirements.txt
 ```
 
+---
+
 ## 📂 Project Structure
 
 ```text
 lindat-wrapper/
 ├── main.py                 # 🚀 Entry point for the CLI, routing standard vs. in-place XML processing
 ├── requirements.txt        # 📦 Python dependencies
+├── config.txt              # ⚙️ Configuration parameters for input paths, formats, and languages
 ├── xml-fields.txt          # 📄 List of XML tags to extract text from (for targeted XML translation)
 ├── v3/                     # ⚠️ [REQUIRED] Helper folder from LayoutReader repo
 ├── processors/
@@ -75,30 +80,70 @@ lindat-wrapper/
 └── utils.py                # 🔧 ALTO parsing, box normalization, and XML tree reconstruction
 ```
 
+---
+
 ## 💻 Usage
 
 Run the wrapper from the command line. The default target language is English (`en`).
 
-### ▶️ Basic Usage (Flat Text Extraction)
+### ▶️ Basic Usage (Single File)
 
 ```bash
 python main.py input_file.pdf
 ```
 
+### 📁 Batch Processing
+
+You can process an entire directory of files. The script will automatically recursively find 
+valid files based on the specified formats and output them to a designated folder.
+
+```bash
+python main.py ./my_documents --formats xml,pdf --target_lang en
+```
+
+### ⚙️ Configuration File Support
+
+Instead of passing all arguments via the command line, you can use a 
+configuration file (automatically looks for `config.txt` in the current directory) to define 
+default paths and parameters. Console arguments take precedence and will override config file
+parameters. Example [config.txt](config.txt):
+
+```ini
+input_path = ./my_documents
+source_lang = auto
+target_lang = en
+formats = xml,txt,pdf
+output = ./translated_files
+fields = xml-fields.txt
+```
+
 ### 🎯 Targeted XML Translation (In-Place)
 
-Use this mode to translate specific XML elements while outputting a fully intact `.xml` file:
+Use this mode to translate specific XML elements while outputting a fully 
+intact `.xml` file:
 
 ```bash
 python main.py document.xml --fields xml-fields.txt --target_lang en
 ```
 
+Example of ALTO XML processing:
+- **Input**: [MTX201501307.alto.xml](MTX201501307.alto.xml) 
+- **Output**: [MTX201501307.alto_en.xml](MTX201501307.alto_en.xml)
+
+The translation is performed in a per-`TextBlock` manner, and reconstruction of XML elements structure is
+performed on per-`TextLine` manner (Each text line has a `String` element with `CONTENT` attribute).
+
 ### ⚙️ Supported Arguments
 
-* `input_file`: Path to the source file (`.pdf`, `.xml`, `.txt`, `.docx`, `.html`, `.csv`, `.json`).
-* `--fields`: Path to a `.txt` file containing XML tags to translate (one per line). Triggers the in-place XML processing mode.
-* `--output`: Path to save the translated text. Defaults to `<input_name>_<target_lang>.txt` (or `.xml` if using `--fields`) in the same directory.
-* `--target_lang`: Target language code (e.g., `en`, `cs`, `fr`). Default is `en`.
+* `input_path`: Path to a single source file or a directory containing files.
+* `--config`: Path to a config file. Defaults to `config.txt` automatically.
+* `--fields`: Path to a `.txt` file containing XML tags to translate. Triggers the in-place XML processing mode if an `.xml` file is detected.
+* `--output`, `-o`: Output file path (for single file mode) or output directory (for batch directory mode).
+* `--source_lang`, `-src`: Source language code (e.g., `cs`, `fr`). Use `auto` to auto-detect. Default is `auto`.
+* `--target_lang`, `-tgt`: Target language code (e.g., `en`, `cs`, `fr`). Default is `en`.
+* `--formats`, `-f`: Comma-separated list of formats to process in batch mode (e.g., `xml,txt,pdf`). Default is `xml,txt,pdf`.
+
+---
 
 ## 🧠 Logic Overview
 
@@ -112,6 +157,8 @@ python main.py document.xml --fields xml-fields.txt --target_lang en
 3. **🏛️ Targeted XML Processing** : When `--fields` is provided, the script parses the XML tree, matches the specified tags, and extracts the target text (prioritizing ALTO's `CONTENT` attributes over standard inner text). The translated text is directly injected back into the tree, and the file is saved with its original namespaces intact.
 4. **🔎 Identification**: The text is analyzed by **FastText** to determine the source language (mapping ISO 639-3 to ISO 639-1). If the confidence score is below `0.4`, the system automatically defaults to Czech (`cs`).
 5. **🗣️ Translation**: Text is passed to the **Lindat Translation API**. In XML mode, unique strings are cached to minimize API limits; otherwise, long texts are chunked into 5,000-character segments to respect Lindat's payload constraints.
+
+---
 
 ## 🙏 Acknowledgements
 
