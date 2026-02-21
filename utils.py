@@ -3,6 +3,60 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 
+def get_alto_textblocks(xml_path):
+    """
+    Parses an ALTO XML file and extracts text at the TextBlock level.
+    Returns: (tree, root, namespace, blocks_data)
+    where blocks_data is a list of tuples: (TextBlock Element, block_text_string, list_of_TextLine_Elements)
+    """
+    try:
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
+        namespace = ''
+
+        # Determine and register namespace to preserve it during output write
+        if '}' in root.tag:
+            namespace_uri = root.tag.split('}')[0].strip('{')
+            namespace = f"{{{namespace_uri}}}"
+            ET.register_namespace('', namespace_uri)
+    except Exception as e:
+        print(f"[ERROR] Parsing XML file failed: {e}")
+        return None, None, None, []
+
+    blocks_data = []
+
+    # Target TextBlocks for paragraph-level contextual translation
+    search_tag = f".//{namespace}TextBlock" if namespace else ".//TextBlock"
+    text_blocks = root.findall(search_tag)
+
+    for block in text_blocks:
+        block_text_parts = []
+        lines_data = []
+
+        line_search_tag = f".//{namespace}TextLine" if namespace else ".//TextLine"
+        string_search_tag = f".//{namespace}String" if namespace else ".//String"
+
+        for line in block.findall(line_search_tag):
+            line_text_parts = []
+            # Extract all Strings within the line
+            for string_elem in line.findall(string_search_tag):
+                content = string_elem.attrib.get('CONTENT', '').strip()
+                if content:
+                    line_text_parts.append(content)
+
+            line_text = " ".join(line_text_parts)
+            if line_text:
+                lines_data.append(line)
+                block_text_parts.append(line_text)
+
+        block_text = " ".join(block_text_parts)
+        # Only add blocks that actually contain text
+        if block_text.strip() and lines_data:
+            blocks_data.append((block, block_text, lines_data))
+
+    return tree, root, namespace, blocks_data
+
+
 def get_xml_elements_and_texts(xml_path, fields_path):
     """
     Parses an XML file and extracts elements matching tags in the fields file.
@@ -13,7 +67,7 @@ def get_xml_elements_and_texts(xml_path, fields_path):
         with open(fields_path, 'r', encoding='utf-8') as f:
             fields = [line.strip() for line in f if line.strip()]
     except Exception as e:
-        print(f"Error reading fields file: {e}")
+        print(f"[ERROR] Reading fields file failed: {e}")
         return None, None, None, []
 
     try:
@@ -27,7 +81,7 @@ def get_xml_elements_and_texts(xml_path, fields_path):
             namespace = f"{{{namespace_uri}}}"
             ET.register_namespace('', namespace_uri)
     except Exception as e:
-        print(f"Error parsing XML file: {e}")
+        print(f"[ERROR] Parsing XML file failed: {e}")
         return None, None, None, []
 
     elements_data = []
@@ -51,13 +105,12 @@ def get_xml_elements_and_texts(xml_path, fields_path):
 def parse_alto_xml(xml_path):
     """
     Parses ALTO XML to extract words and bounding boxes.
-    Ref: text_util.py from uploaded context.
     """
     try:
         tree = ET.parse(xml_path)
         root = tree.getroot()
     except Exception as e:
-        print(f"XML Parse Error: {e}")
+        print(f"[ERROR] XML Parse Error: {e}")
         return [], [], (0, 0)
 
     # Handle namespaces if present (e.g., alto:String)
