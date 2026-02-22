@@ -1,6 +1,6 @@
-# 🏛️ ATRIUM - Lindat Translation Wrapper 🌍
+# 🏛️ ATRIUM - LINDAT Translation Wrapper 🌍
 
-A modular Python wrapper for the **Lindat Translation API** [^1]. This tool processes various document types 
+A modular Python wrapper for the **LINDAT Translation API** [^1]. This tool processes various document types 
 (including PDF, ALTO XML, DOCX, HTML, CSV, and JSON), extracts text in the correct reading order using **LayoutReader** 
 (LayoutLMv3) [^3] for complex layouts, identifies the source language, and translates the content to English 
 (or other supported target languages).
@@ -29,7 +29,7 @@ A modular Python wrapper for the **Lindat Translation API** [^1]. This tool proc
 * 🎯 **Targeted In-Place XML Translation**: Translates specific, user-defined XML fields (e.g., ALTO `CONTENT` attributes or standard tags) while strictly preserving the original document structure and namespaces - **KEY FEATURE** for ALTO XML processing.
 * 🧠 **Intelligent Layout Analysis**: Uses **LayoutReader** to reconstruct the correct reading order for PDFs and standard ALTO XML extractions, ensuring that multi-column or complex layouts are translated coherently [^3]). Uses bounding boxes of the text regions to predict the correct sequence.
 * 🕵️ **Language Detection with Intelligent Fallback**: Automatically identifies the source language using **FastText** (Facebook) [^5]. If the detection confidence is low (< 0.4), it automatically defaults to Czech (`cs`) to ensure the pipeline continues.
-* 🔗 **Lindat API Integration**: Seamlessly connects to the Lindat Translation API (v2) for high-quality translation, including automatic cache handling to minimize redundant requests for identical XML strings [^1]).
+* 🔗 **LINDAT API Integration**: Seamlessly connects to the LINDAT Translation API (v2) for high-quality translation, including automatic cache handling to minimize redundant requests for identical XML strings [^1]).
 * 📐 **ALTO XML Parsing**: Native support for ALTO standards, including coordinate normalization and hyphenation handling.
 
 ---
@@ -79,7 +79,7 @@ lindat-wrapper/
 ├── processors/
 │   ├── extractor.py        # 📄 Text extraction (ALTO/PDF/DOCX/HTML/CSV/JSON) + LayoutReader inference
 │   ├── identifier.py       # 🌍 FastText language identification (ISO 639-3 to 639-1 mapping)
-│   └── translator.py       # 🔄 Lindat API client with dynamic model fetching
+│   └── translator.py       # 🔄 LINDAT API client with dynamic model fetching
 └── utils.py                # 🔧 ALTO parsing, box normalization, and XML tree reconstruction
 ```
 
@@ -133,7 +133,7 @@ python main.py document.xml --fields xml-fields.txt --target_lang en
 
 Example of ALTO XML processing:
 - **Input**: [MTX201501307.alto.xml](MTX201501307.alto.xml) 
-- **Output**: [MTX201501307.alto_en.xml](MTX201501307.alto_en.xml)
+- **Output**: [MTX201501307.alto_en.xml](translated_en/MTX201501307.alto_en.xml)
 
 The translation is performed in a per-`TextBlock` manner, and reconstruction of XML elements structure is
 performed on per-`TextLine` manner (Each text line has a `String` element with `CONTENT` attribute).
@@ -161,7 +161,7 @@ performed on per-`TextLine` manner (Each text line has a `String` element with `
 2. **🧩 Reordering**: For PDFs and raw XML extractions, bounding boxes are passed to the **LayoutReader** model. It predicts the correct reading sequence in chunks of 350 tokens, fixing issues common in OCR outputs (e.g., reading across columns).
 3. **🏛️ Targeted XML Processing** : When `--fields` is provided, the script parses the XML tree, matches the specified tags, and extracts the target text (prioritizing ALTO's `CONTENT` attributes over standard inner text). The translated text is directly injected back into the tree, and the file is saved with its original namespaces intact.
 4. **🔎 Identification**: The text is analyzed by **FastText** to determine the source language (mapping ISO 639-3 to ISO 639-1). If the confidence score is below `0.4`, the system automatically defaults to Czech (`cs`).
-5. **🗣️ Translation**: Text is passed to the **Lindat Translation API**. In XML mode, unique strings are cached to minimize API limits; otherwise, long texts are chunked into 5,000-character segments to respect Lindat's payload constraints.
+5. **🗣️ Translation**: Text is passed to the **LINDAT Translation API**. In XML mode, unique strings are cached to minimize API limits; otherwise, long texts are chunked into 5,000-character segments to respect LINDAT's payload constraints.
 
 ---
 
@@ -172,7 +172,7 @@ performed on per-`TextLine` manner (Each text line has a `String` element with `
 - **Developed by** UFAL [^7] 👥
 - **Funded by** ATRIUM [^4]  💰
 - **Shared by** ATRIUM [^4] & UFAL [^7] 🔗
-- **Translation API**: Lindat/CLARIAH-CZ Translation Service [^1] 🔗
+- **Translation API**: LINDAT/CLARIAH-CZ Translation Service [^1] 🔗
 - **Layout Analysis**: LayoutReader (LayoutLMv3) [^3] 🔗
 - **Language Identification**: Facebook FastText [^5] 🔗
 
