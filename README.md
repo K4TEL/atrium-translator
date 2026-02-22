@@ -132,7 +132,7 @@ python main.py document.xml --fields xml-fields.txt --target_lang en
 ```
 
 Example of ALTO XML processing:
-- **Input**: [MTX201501307.alto.xml](MTX201501307.alto.xml) 
+- **Input**: [MTX201501307.alto.xml](my_documents/MTX201501307.alto.xml) 
 - **Output**: [MTX201501307.alto_en.xml](translated_en/MTX201501307.alto_en.xml)
 
 The translation is performed in a per-`TextBlock` manner, and reconstruction of XML elements structure is
