@@ -1,0 +1,10 @@
+//amcr:amcr/amcr:dokument/amcr:popis
+//amcr:amcr/amcr:dokument/amcr:poznamka
+//amcr:amcr/amcr:dokument/amcr:dokument_cast/amcr:neident_akce/amcr:lokalizace
+//amcr:amcr/amcr:archeologicky_zaznam/amcr:akce/amcr:chranene_udaje/amcr:lokalizace_okolnosti
+//amcr:amcr/amcr:archeologicky_zaznam/amcr:akce/amcr:chranene_udaje/amcr:souhrn_upresneni
+//amcr:amcr/amcr:archeologicky_zaznam/amcr:dokumentacni_jednotka/amcr:komponenta/amcr:nalez_predmet/amcr:poznamka
+//amcr:amcr/amcr:archeologicky_zaznam/amcr:dokumentacni_jednotka/amcr:komponenta/amcr:nalez_objekt/amcr:poznamka
+//amcr:amcr/amcr:archeologicky_zaznam/amcr:lokalita/amcr:chranene_udaje/amcr:nazev
+//amcr:amcr/amcr:archeologicky_zaznam/amcr:lokalita/amcr:chranene_udaje/amcr:popis
+//amcr:amcr/amcr:archeologicky_zaznam/amcr:lokalita/amcr:chranene_udaje/amcr:poznamka
